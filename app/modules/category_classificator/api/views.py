@@ -23,7 +23,8 @@ class PredictCategoryClassificatorView(interfaces.APIView):
 
     def post(self):
         try:
-            request_data = flask.request.get_json()
+            logging.info("Encabezados de la petición: %s", flask.request.headers)
+            request_data = flask.request.get_json(force=True)
             if request_data is None:
                 return utils.Response(
                     response={"message": "El tipo de contenido debe ser 'application/json'."},
@@ -33,7 +34,7 @@ class PredictCategoryClassificatorView(interfaces.APIView):
             schema = schemas.PredictRequestSchema()
             data = schema.load(request_data)
 
-            prediction = self.predict_service.call(text=data['text'])
+            prediction = self.predict_service.call(text=request_data['text'])
 
             return utils.Response(response={"data": prediction}, status=utils.Status.OK_200)
 
