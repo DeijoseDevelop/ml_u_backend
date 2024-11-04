@@ -2,6 +2,7 @@ import io
 import os
 import pickle
 import typing as t
+import logging
 
 import numpy as np
 import cv2.typing
@@ -32,13 +33,13 @@ class RecognitionRepository:
                     cache_data = pickle.load(f)
                     cache_person_count = cache_data.get('person_count', 0)
                     if cache_person_count != total_person_count:
-                        print("El caché está desactualizado. Recargando datos desde la base de datos.")
+                        logging.info("El caché está desactualizado. Recargando datos desde la base de datos.")
                         self._load_data_from_database()
                         self._save_cache(cache_file, total_person_count)
                     else:
                         self.known_face_encodings = cache_data['encodings']
                         self.known_face_ids = cache_data['ids']
-                        print("Datos cargados desde el caché.")
+                        logging.info("Datos cargados desde el caché.")
             else:
                 self._load_data_from_database()
                 self._save_cache(cache_file, total_person_count)
@@ -53,7 +54,7 @@ class RecognitionRepository:
         if self.known_face_encodings.ndim == 1:
             self.known_face_encodings = self.known_face_encodings.reshape(1, -1)
 
-        print(f"Shape of known_face_encodings: {self.known_face_encodings.shape}")
+        logging.info(f"Shape of known_face_encodings: {self.known_face_encodings.shape}")
 
         # Ahora, inicializar el KDTree
         self.kd_tree = KDTree(self.known_face_encodings)
@@ -68,8 +69,8 @@ class RecognitionRepository:
                 self.known_face_encodings.append(encoding)
                 self.known_face_ids.append(person.id)
             else:
-                print(f"Advertencia: La persona '{person.name}' no tiene una codificación facial válida.")
-        print(f"Número de codificaciones faciales cargadas: {len(self.known_face_encodings)}")
+                logging.warning(f"Advertencia: La persona '{person.name}' no tiene una codificación facial válida.")
+        logging.info(f"Número de codificaciones faciales cargadas: {len(self.known_face_encodings)}")
 
     def _save_cache(self, cache_file, person_count):
         # Guardar las codificaciones y los IDs en el archivo de caché
@@ -80,7 +81,7 @@ class RecognitionRepository:
         }
         with open(cache_file, 'wb') as f:
             pickle.dump(cache_data, f)
-        print("Caché actualizado y guardado.")
+        logging.info("Caché actualizado y guardado.")
 
     def detect_face(self, image_bytes: io.BytesIO) -> t.List[t.Dict[str, t.Any]]:
         cv2_image = self._convert_bytes_to_cv2_image(image_bytes)
