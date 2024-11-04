@@ -1,0 +1,3 @@
+from app.modules.category_classificator.services.s_clean_data import CleanDataService
+from app.modules.category_classificator.services.s_predict import PredictService
+from app.modules.category_classificator.services.s_train_model import TrainModelService

@@ -57,6 +57,7 @@ template = {
 app.config["model"] = "C:/Users/Deiver Vasquez/Documents/persona_projects/machine_learning_u_project/ml_u_backend/app/modules/category_classificator/data/train_models/model.joblib"
 app.config["vectorizer"] = "C:/Users/Deiver Vasquez/Documents/persona_projects/machine_learning_u_project/ml_u_backend/app/modules/category_classificator/data/train_models/vectorizer.joblib"
 app.config["recognition_data"] = "C:/Users/Deiver Vasquez/Documents/persona_projects/machine_learning_u_project/ml_u_backend/app/modules/user_recognition/data/train_data/images"
+app.config["classification_data"] = "C:/Users/Deiver Vasquez/Documents/persona_projects/machine_learning_u_project/ml_u_backend_2/app/modules/category_classificator/train_data/test_data.xlsx"
 
 swagger = Swagger(app, template=template)
 

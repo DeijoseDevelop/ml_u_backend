@@ -112,15 +112,19 @@ class DataManager(common_interfaces.Manager):
             image_path = os.path.join(self._path, image_name)
             if not os.path.isfile(image_path):
                 continue
+
             image = cv2.imread(image_path)
             if image is None:
                 continue
+
             resized_image = self.image_manager.resize_image(image=image, scale_percent=40.0)
             encodings = self.face_detector.get_face_encodings(resized_image)
+
             if encodings:
                 self._encodings.append(encodings[0])
             else:
                 pass
+
         return self._encodings
 
 

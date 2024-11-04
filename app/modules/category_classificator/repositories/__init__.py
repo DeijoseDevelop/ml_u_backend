@@ -1,0 +1,3 @@
+from app.modules.category_classificator.repositories.r_clean_data import CleanDataRepository
+from app.modules.category_classificator.repositories.r_predict import PredictRepository
+from app.modules.category_classificator.repositories.r_train_model import TrainModelRepository

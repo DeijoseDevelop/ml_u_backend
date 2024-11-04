@@ -9,11 +9,13 @@ PyJWT==2.9.0
 importlib-metadata==7.0.1
 python-dotenv==1.0.1
 setuptools
+joblib==1.4.2
 
 # Data Scientists
 numpy==2.1.3
 polars==1.12.0
 xlsx2csv==0.8.3
+fastexcel==0.12.0
 # openpyxl==3.1.2
 # pandas==2.1.4
 SQLAlchemy==2.0.36

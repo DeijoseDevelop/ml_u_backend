@@ -12,7 +12,7 @@ class Status(enum.Enum):
     BAD_REQUEST_400 = 400
     UNAUTHORIZED_401 = 401
     NOT_FOUND_404 = 404
-    SERVER_ERROR_500 = 500
+    INTERNAL_SERVER_ERROR_500 = 500
 
 
 class Response(flask.Response):
