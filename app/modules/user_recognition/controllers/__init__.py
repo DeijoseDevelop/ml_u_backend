@@ -1,0 +1,1 @@
+from app.modules.user_recognition.controllers.c_recognition import RecognitionController

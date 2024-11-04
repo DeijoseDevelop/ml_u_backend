@@ -1,0 +1,1 @@
+from app.modules.user_recognition.repositories.r_recognition import RecognitionRepository

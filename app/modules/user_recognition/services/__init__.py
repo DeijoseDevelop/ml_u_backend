@@ -1,0 +1,1 @@
+from app.modules.user_recognition.services.recognition_service import RecognitionService
