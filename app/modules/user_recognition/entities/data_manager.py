@@ -21,7 +21,7 @@ class DataManager(common_interfaces.Manager):
         self.face_detector = face_detector
         self.image_manager = image_manager
 
-        self._image_names = os.listdir(path)
+        self._image_names = [f for f in os.listdir(self._path) if os.path.isfile(os.path.join(self._path, f))]
         self._data = []
         self._names = []
         self._encodings = []
@@ -52,6 +52,7 @@ class DataManager(common_interfaces.Manager):
 
         with current_app.app_context():
             for image_name in self.get_image_names():
+                print(image_name)
                 # Verificar si la imagen está en el CSV
                 if image_name not in person_data:
                     print(f"La imagen {image_name} no está en el archivo CSV.")
@@ -60,6 +61,8 @@ class DataManager(common_interfaces.Manager):
                 data = person_data[image_name]
                 name = data['name']
                 image_path = os.path.join(self._path, image_name)
+                # print(data)
+                # print(image_path)
 
                 if not os.path.isfile(image_path):
                     continue
