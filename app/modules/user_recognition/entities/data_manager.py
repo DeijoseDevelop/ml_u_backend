@@ -10,7 +10,7 @@ import cv2
 from .face_detector import FaceDetector
 from .image_manager import ImageManager
 from app.modules.common import interfaces as common_interfaces
-from app.modules.user_recognition.models.person import Person
+from app.modules.user_recognition.models.user import User
 from app.config import db
 
 
@@ -41,24 +41,24 @@ class DataManager(common_interfaces.Manager):
         return self._data
 
     def set_data(self) -> None:
-        person_data = {}
+        user_data = {}
         csv_file_path = 'person_data.csv'
 
         with open(csv_file_path, mode='r', encoding='utf-8') as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
                 image_name = row['image_name']
-                person_data[image_name] = row
+                user_data[image_name] = row
 
         with current_app.app_context():
             for image_name in self.get_image_names():
                 print(image_name)
                 # Verificar si la imagen está en el CSV
-                if image_name not in person_data:
+                if image_name not in user_data:
                     print(f"La imagen {image_name} no está en el archivo CSV.")
                     continue
 
-                data = person_data[image_name]
+                data = user_data[image_name]
                 name = data['name']
                 image_path = os.path.join(self._path, image_name)
                 # print(data)
@@ -68,9 +68,9 @@ class DataManager(common_interfaces.Manager):
                     continue
 
                 # Verificar si ya existe un registro de Person con ese nombre
-                person = Person.query.filter_by(name=name).first()
+                user = User.query.filter_by(name=name).first()
 
-                if person is None:
+                if user is None:
                     # Procesar la imagen para obtener la codificación facial
                     image = cv2.imread(image_path)
                     if image is None:
@@ -81,7 +81,7 @@ class DataManager(common_interfaces.Manager):
                     if encodings:
                         face_encoding = encodings[0]
                         # Crear un nuevo registro de Person con los datos del CSV
-                        person = Person(
+                        user = User(
                             name=data['name'],
                             document_number=data['document_number'],
                             gender=data['gender'],
@@ -90,24 +90,24 @@ class DataManager(common_interfaces.Manager):
                             academic_program=data['academic_program'],
                             face_encoding=face_encoding
                         )
-                        db.session.add(person)
+                        db.session.add(user)
                         db.session.commit()
 
-                        self._names.append(person.name)
+                        self._names.append(user.name)
                         self._encodings.append(face_encoding)
                         self._data.append({
-                            "name": person.name,
+                            "name": user.name,
                             "encoding": face_encoding,
                         })
                     else:
                         print(f"No se detectó ninguna cara en la imagen {image_name}")
                 else:
                     # Si la persona ya existe, agregar sus datos
-                    self._names.append(person.name)
-                    self._encodings.append(person.face_encoding)
+                    self._names.append(user.name)
+                    self._encodings.append(user.face_encoding)
                     self._data.append({
-                        "name": person.name,
-                        "encoding": person.face_encoding,
+                        "name": user.name,
+                        "encoding": user.face_encoding,
                     })
 
     def set_encodings(self) -> t.List[ndarray]:
