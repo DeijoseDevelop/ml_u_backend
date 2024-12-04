@@ -26,3 +26,8 @@ class AcademicProgram(enum.Enum):
         "Tecnología en Gestión de Servicios Turísticos y Hoteleros"
     )
     TECHNOLOGY_IN_QUALITY_MANAGEMENT_SYSTEMS = "Tecnología en Sistemas de Gestión de Calidad"
+
+class UserType(enum.Enum):
+    ADMIN = "Admin"
+    LIBRARIAN = "Bibliotecario"
+    SECRETARY = "Secretario"

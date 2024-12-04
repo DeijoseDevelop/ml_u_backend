@@ -34,7 +34,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Setup the Flask-JWT-Extended extension
 app.config["JWT_SECRET_KEY"] = tokens_session
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=2)
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 jwt = JWTManager(app)
 
 app.config['TIMEZONE'] = 'America/Bogota'

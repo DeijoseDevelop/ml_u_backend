@@ -1,14 +1,16 @@
 import io
 import flask
 import logging
+from flask_jwt_extended import jwt_required
 
 from app.modules.create_user import controllers, services
 from app.modules.user_recognition import entities
-from app.modules.common import interfaces, utils, decorators, validations
+from app.modules.common import interfaces, utils, validations
 
 
 class UserExternalCreateView(interfaces.APIView):
-
+    
+    @jwt_required()
     def post(self):
         try:
             # Obtener datos de la solicitud
