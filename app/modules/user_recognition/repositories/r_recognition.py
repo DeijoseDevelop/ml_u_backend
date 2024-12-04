@@ -60,16 +60,16 @@ class RecognitionRepository:
         self.kd_tree = KDTree(self.known_face_encodings)
 
     def _load_data_from_database(self):
-        persons = models.Person.query.all()
+        users = models.User.query.all()
         self.known_face_encodings = []
         self.known_face_ids = []
-        for person in persons:
-            encoding = person.face_encoding
+        for user in users:
+            encoding = user.face_encoding
             if encoding is not None and len(encoding) > 0:
                 self.known_face_encodings.append(encoding)
-                self.known_face_ids.append(person.id)
+                self.known_face_ids.append(user.id)
             else:
-                logging.warning(f"Advertencia: La persona '{person.name}' no tiene una codificación facial válida.")
+                logging.warning(f"Advertencia: La persona '{user.name}' no tiene una codificación facial válida.")
         logging.info(f"Número de codificaciones faciales cargadas: {len(self.known_face_encodings)}")
 
     def _save_cache(self, cache_file, person_count):
@@ -128,15 +128,15 @@ class RecognitionRepository:
 
         # Buscar la coincidencia más cercana en el KDTree
         distance, index = self.kd_tree.query(face_encoding)
-        person_id = self.known_face_ids[index]
+        user_id = self.known_face_ids[index]
 
         if distance < match_threshold:
             # Obtener la información de la persona desde la base de datos
             with current_app.app_context():
-                person = models.Person.query.get(person_id)
+                user = models.User.query.get(user_id)
 
-            if person:
-                name = person.name
+            if user:
+                name = user.name
                 # Dibuja en la imagen
                 self.image_manager.draw_rectangle(positions=(top, right, bottom, left), thickness=2)
                 self.image_manager.draw_rectangle(positions=(bottom, right, bottom - 25, left), thickness=cv2.FILLED)
@@ -144,12 +144,12 @@ class RecognitionRepository:
 
                 # Preparar los datos para devolver
                 detection = {
-                    "name": person.name,
-                    "document_number": person.document_number,
-                    "gender": person.gender,
-                    "user_type": person.user_type,
-                    "dependency": person.dependency,
-                    "academic_program": person.academic_program,
+                    "name": user.name,
+                    "document_number": user.document_number,
+                    "gender": user.gender,
+                    "user_type": user.user_type,
+                    "dependency": user.dependency,
+                    "academic_program": user.academic_program,
                     "matched": True,
                     "face_locations": {
                         "top": top,
