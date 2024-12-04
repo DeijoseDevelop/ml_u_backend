@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import os
 import secrets
 from datetime import timedelta
+from flask_bcrypt import Bcrypt 
 
 
 ## charge enviroment variables
@@ -20,6 +21,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+bcrypt = Bcrypt(app) 
+
 
 # secret key for mongo session
 tokens_session = secrets.token_hex(20)
