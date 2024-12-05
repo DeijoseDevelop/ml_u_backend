@@ -21,12 +21,12 @@ class RecognitionRepository:
         cache_file = 'face_encodings_cache.pkl'
 
         with current_app.app_context():
-            total_person_count = models.Person.query.count()
-            self.data_manager = entities.DataManager(
-                image_manager=image_manager,
-                path=current_app.config.get("recognition_data"),
-                face_detector=self.face_detector
-            )
+            total_person_count = models.User.query.count()
+            # self.data_manager = entities.DataManager(
+            #     image_manager=image_manager,
+            #     path=current_app.config.get("recognition_data"),
+            #     face_detector=self.face_detector
+            # )
 
             if os.path.exists(cache_file):
                 with open(cache_file, 'rb') as f:

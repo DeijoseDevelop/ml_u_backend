@@ -49,27 +49,27 @@ def validate_user_data(user_data):
 
 
 def validate_email(email: str):
-    if not email or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+    if not email.strip() or not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         raise exceptions.UseCaseException(message="intrucir email valido")
 
 def validate_gender(gender: str):
     allowed_genders = ["Masculino", "Femenino", "Otro"]
-    if gender not in allowed_genders:
+    if gender.strip() not in allowed_genders:
         raise exceptions.UseCaseException(message=f"Gender must be one of {allowed_genders}")
 
 def validate_picture(picture):
-    if picture.mimetype not in ["image/jpeg", "image/png"]:
+    if picture.mimetype.strip() not in ["image/jpeg", "image/png"]:
         raise exceptions.UseCaseException(message="Picture must be a JPEG or PNG image")
     if picture.content_length > 5 * 1024 * 1024:  # 5 MB
         raise exceptions.UseCaseException(message="Picture size must not exceed 5 MB")
 
 
 def validate_document_number(document_number: str):
-    if not re.match(r"^\d{6,}$", document_number):
+    if not re.match(r"^\d{6,}$", document_number.strip()):
         raise exceptions.UseCaseException(message="Número de documento inválido.")
 
 
 def validate_academic_program(academic_program: str):
-    if academic_program not in [p.value for p in AcademicProgram]:
+    if academic_program.strip() not in [p.value for p in AcademicProgram]:
         raise exceptions.UseCaseException(message=f"Programa academico no valido")
     

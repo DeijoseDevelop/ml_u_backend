@@ -10,7 +10,7 @@ from app.modules.common import interfaces, utils, validations
 
 class UserExternalCreateView(interfaces.APIView):
     
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         try:
             # Obtener datos de la solicitud

@@ -57,10 +57,10 @@ template = {
 }
 
 # Machine learning config
-app.config["model"] = "/home/DeijoseDevelop/ml_u_backend/app/modules/category_classificator/train_models/model.joblib"
-app.config["vectorizer"] = "/home/DeijoseDevelop/ml_u_backend/app/modules/category_classificator/train_models/vectorizer.joblib"
-app.config["recognition_data"] = "/home/DeijoseDevelop/ml_u_backend/app/modules/user_recognition/train_data/images"
-app.config["classification_data"] = "/home/DeijoseDevelop/ml_u_backend/app/modules/category_classificator/train_data/test_data.xlsx"
+app.config["model"] = f"{os.getenv('X_API_KEY')}/category_classificator/train_models/model.joblib"
+app.config["vectorizer"] = f"{os.getenv('X_API_KEY')}/category_classificator/train_models/vectorizer.joblib"
+app.config["recognition_data"] = f"{os.getenv('X_API_KEY')}/user_recognition/train_data/images"
+app.config["classification_data"] = f"{os.getenv('X_API_KEY')}/category_classificator/train_data/test_data.xlsx"
 
 swagger = Swagger(app, template=template)
 
