@@ -30,11 +30,7 @@ app.config["SECRET_KEY"] = tokens_session
 
 # print(tokens_session)
 # Cors config
-cors = CORS(app, resources={r"/*": {"origins": "*"}},
-    supports_credentials=True,
-    expose_headers="*",
-    allow_headers=["Content-Type", "Authorization", "X-Requested-With"],
-)
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Setup the Flask-JWT-Extended extension

@@ -8,7 +8,7 @@ from app.modules.common import interfaces, utils
 
 class UserInternaAuthView(interfaces.APIView):
     
-    @cross_origin()
+    @cross_origin(origin='*')
     def post(self):
         try:
             user_data = flask.request.form if flask.request.form else flask.request.json
