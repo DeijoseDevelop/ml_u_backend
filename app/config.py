@@ -28,12 +28,14 @@ bcrypt = Bcrypt(app)
 tokens_session = secrets.token_hex(20)
 app.config["SECRET_KEY"] = tokens_session
 
+# print(tokens_session)
 # Cors config
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Setup the Flask-JWT-Extended extension
-app.config["JWT_SECRET_KEY"] = tokens_session
+# app.config["JWT_SECRET_KEY"] = tokens_session
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=24)
 jwt = JWTManager(app)
 
