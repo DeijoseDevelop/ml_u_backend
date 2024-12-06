@@ -8,8 +8,10 @@ import numpy as np
 import cv2.typing
 from scipy.spatial import KDTree
 from flask import current_app
+from app.config import db
 
 from app.modules.user_recognition import entities, models
+from app.modules.user_recognition.models.ingressRecord import IngressRecord
 
 
 class RecognitionRepository:
@@ -158,6 +160,16 @@ class RecognitionRepository:
                         "left": left,
                     }
                 }
+                
+                ingress_data = {
+                "user_id": user.id,
+                "suggestions_comments": None,  
+                "protection_notice": None,
+                "services_library": None,
+                }
+                self.create_ingress_record(ingress_data)
+                # detection["ingress_record_id"] = ingress_record.id 
+                
             else:
                 detection = {
                     "name": "Unknown",
@@ -183,3 +195,12 @@ class RecognitionRepository:
 
         data.append(detection)
         return data
+    
+    
+    @staticmethod
+    def create_ingress_record(data: dict) -> IngressRecord:
+        ingress_record = IngressRecord(**data)
+        db.session.add(ingress_record)
+        db.session.commit()
+        return ingress_record
+        
