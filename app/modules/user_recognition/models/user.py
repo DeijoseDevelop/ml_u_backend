@@ -16,5 +16,6 @@ class User(db.Model):
     academic_program = db.Column(db.String(100), nullable=True)
     face_encoding = db.Column(db.PickleType, nullable=True)  # Asegúrate de que este campo está definido
     ingress_records = db.relationship('IngressRecord', back_populates='user', cascade='all, delete-orphan')
+
     def __repr__(self):
         return f'<User {self.name}>'

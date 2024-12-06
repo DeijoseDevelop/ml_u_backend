@@ -17,7 +17,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database2.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -29,9 +29,7 @@ tokens_session = secrets.token_hex(20)
 app.config["SECRET_KEY"] = tokens_session
 
 # print(tokens_session)
-# Cors config
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+
 
 # Setup the Flask-JWT-Extended extension
 # app.config["JWT_SECRET_KEY"] = tokens_session
@@ -67,6 +65,10 @@ app.config["classification_data"] = f"{os.getenv('X_API_KEY')}/category_classifi
 swagger = Swagger(app, template=template)
 
 app.config["UPLOAD_FOLDER"] = os.getenv("UPLOAD_FOLDER")
+
+# Cors config
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Redis config
 # app.config['REDIS_URL'] = "redis://localhost:6379/0"

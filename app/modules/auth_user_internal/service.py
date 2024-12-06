@@ -14,6 +14,7 @@ class UserInternalAuth:
         
     def auth_user_internal(self, email: str, password: str) -> User:
         try:
+            print(email, password)
             user = self.repository.get_user_by_email(email=email)
             if not user:
                 logging.error(f"Usuario no encontrado para el email: {email}")
@@ -24,7 +25,10 @@ class UserInternalAuth:
                 logging.error(f"Contraseña incorrecta para el email: {email}")
                 raise UseCaseException(message="El email o contraseña son incorrectos")
             
-            if user.user_type not in [type.value for type in UserType]:
+            print(user.user_type.lower())
+            print([type.value.lower() for type in UserType])
+            
+            if user.user_type.lower() not in [type.value.lower() for type in UserType]:
                 raise UseCaseException(message="Tipo de usuario no autorizado")
            
             return user
