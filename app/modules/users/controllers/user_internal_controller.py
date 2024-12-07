@@ -2,7 +2,7 @@ import io
 
 from app.config import bcrypt
 from app.modules.common import exceptions, utils
-from app.modules.create_user.services.user_internal_service import UserInternalService
+from app.modules.users.services.user_internal_service import UserInternalService
 
 class UserInternalController:
 

@@ -1,7 +1,7 @@
 import io
 import logging
 from app.modules.user_recognition import entities
-from app.modules.create_user import repositories
+from app.modules.users import repositories
 from app.modules.common import exceptions
 
 

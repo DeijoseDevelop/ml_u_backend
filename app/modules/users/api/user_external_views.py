@@ -3,7 +3,7 @@ import flask
 import logging
 from flask_jwt_extended import jwt_required
 
-from app.modules.create_user import controllers, services
+from app.modules.users import controllers, services
 from app.modules.user_recognition import entities
 from app.modules.common import interfaces, utils, validations
 

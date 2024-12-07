@@ -1,2 +1,0 @@
-from app.modules.create_user.controllers.user_external_controller import UserExternalController
-from app.modules.create_user.controllers.user_internal_controller import UserInternalController

@@ -12,6 +12,7 @@ class User(db.Model):
     password = db.Column(db.String(20), nullable=True)
     gender = db.Column(db.String(20), nullable=False)
     user_type = db.Column(db.String(20), nullable=False)
+    is_internal = db.Column(db.Boolean, default=False)
     dependency = db.Column(db.String(50), nullable=True)
     academic_program = db.Column(db.String(100), nullable=True)
     face_encoding = db.Column(db.PickleType, nullable=True)  # Asegúrate de que este campo está definido

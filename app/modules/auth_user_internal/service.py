@@ -3,7 +3,7 @@ import logging
 from app.config import bcrypt
 from app.modules.common.exceptions import UseCaseException
 from app.modules.common.enums import UserType
-from app.modules.create_user import repositories
+from app.modules.users import repositories
 from app.modules.user_recognition.models.user import User
 
 
