@@ -30,3 +30,15 @@ users.add_url_rule(
     view_func=users_views.UserExternalListView.as_view("list_external_users"),
     methods=['GET'],
 )
+
+users.add_url_rule(
+    '/api/v1/users/<int:user_id>/',
+    view_func=users_views.UserDeleteView.as_view("delete_users"),
+    methods=['DELETE'],
+)
+
+users.add_url_rule(
+    '/api/v1/users/<int:user_id>/',
+    view_func=users_views.UserUpdatelView.as_view("update_user_external"),
+    methods=['PATCH'],
+)
