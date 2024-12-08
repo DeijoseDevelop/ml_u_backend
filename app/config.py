@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 import os
 import secrets
 from datetime import timedelta
-from flask_bcrypt import Bcrypt 
+from flask_bcrypt import Bcrypt
 
 
 ## charge enviroment variables

@@ -13,9 +13,12 @@ class UserExternalCreateView(interfaces.APIView):
     # @jwt_required()
     def post(self):
         try:
+            print(flask.request.headers)
             # Obtener datos de la solicitud
             user_data = flask.request.form
+            print(user_data)
             picture = flask.request.files.get("picture")
+            print(picture)
             io_picture = io.BytesIO(picture.stream.read())
             
             validations.validate_user_data_with_picture(user_data=user_data, picture=picture)   

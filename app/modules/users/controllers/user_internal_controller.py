@@ -13,11 +13,10 @@ class UserInternalController:
         try:
             password = data.get("password")
             password_hash = bcrypt.generate_password_hash(password=password).decode('utf-8')
-            
 
             if not data:
                 raise exceptions.UseCaseException(message="data missing")
-            
+
             # Crear datos del usuario
             user_data = {
                 "name": data.get("name"),
