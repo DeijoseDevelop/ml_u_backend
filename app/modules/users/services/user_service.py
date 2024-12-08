@@ -1,3 +1,4 @@
+import logging
 from app.modules.users.repositories import UserRepository
 from app.modules.common import exceptions
 
@@ -37,3 +38,40 @@ class UserService:
             "academic_program": user.academic_program,
             # "ingress_records": [record.to_dict() for record in user.ingress_records]
         }
+    
+    def get_user_by_id(self, user_id):
+        try:
+            user = self.repository.get_user_by_id(user_id=user_id)
+            if not user:
+                raise exceptions.UseCaseException(message="El usuario no existe")
+            return user
+        except Exception as e:
+            logging.error(f"Error inesperado al consultar usuario por ID: {e}")
+            raise exceptions.UseCaseException(message="Error interno al buscar el usuario")
+        
+    def delete_user(self, user) -> bool:
+        try:
+            
+            is_delete = self.repository.delete_user(user=user)
+            if not is_delete:
+                raise exceptions.UseCaseException(message="Usuario no eliminado")
+            return True
+
+        except Exception as e:
+            logging.error(f"Error inesperado al eliminar usuario: {e}")
+            raise exceptions.UseCaseException(message="Error inesperado al intentar eliminar el usuario")
+        
+    
+    def update_user(self, user_id: int, user_data) -> dict:
+        try:
+            user = self.repository.update_user(user_id=user_id, data_user=user_data)
+            
+            if not user:
+                raise exceptions.UseCaseException(message="Error al actualizar usuario")
+            
+            return {"message": "Usuario actualizado exitosamente"}
+        
+        except Exception as e:
+            logging.error(f"Error inesperado al actualizar usuario: {e}")
+            raise exceptions.UseCaseException(message=str(e))
+        
