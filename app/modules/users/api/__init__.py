@@ -39,6 +39,6 @@ users.add_url_rule(
 
 users.add_url_rule(
     '/api/v1/users/<int:user_id>/',
-    view_func=users_views.UserUpdatelView.as_view("update_user_external"),
+    view_func=users_views.UserUpdateView.as_view("update_user_external"),
     methods=['PATCH'],
 )

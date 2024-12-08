@@ -65,7 +65,7 @@ class UserRepository:
             return False
         
     
-    def update_user_external(self, user_id: int, data_user) -> User:
+    def update_user(self, user_id: int, data_user) -> User:
         try:
             print("type os user_data: ", type(data_user))
             print("contect user_data: ", data_user)

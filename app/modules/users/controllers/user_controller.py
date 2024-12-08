@@ -11,7 +11,7 @@ class UserController:
         self.user_service = user_service
         
         
-    def update_user_external(self, user_id: int, data):
+    def update_user(self, user_id: int, data):
         try:
             password = data.get("password")
             if password:
@@ -34,7 +34,7 @@ class UserController:
             
             user_data = {key: value for key, value in user_data.items() if value is not None}
 
-            result = self.user_service.update_user_external(user_id=user_id, user_data=user_data)
+            result = self.user_service.update_user(user_id=user_id, user_data=user_data)
             
             if result is None:
                 return utils.Response({"message": "Error al actualizar el usuario"})

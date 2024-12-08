@@ -51,7 +51,7 @@ class UserDeleteView(interfaces.APIView):
         
         
 
-class UserUpdatelView(interfaces.APIView):
+class UserUpdateView(interfaces.APIView):
     def patch(self, user_id):
         try:
             
@@ -66,7 +66,7 @@ class UserUpdatelView(interfaces.APIView):
                 return utils.Response({"message": "ID de usuario inválido"}, status=utils.Status.BAD_REQUEST_400)
             
             
-            return user_controler.update_user_external(user_id=user_id, data=user_data)
+            return user_controler.update_user(user_id=user_id, data=user_data)
         
         except Exception as e:
             logging.error(f"Error processing request: {e}")

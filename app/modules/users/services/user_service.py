@@ -62,9 +62,9 @@ class UserService:
             raise exceptions.UseCaseException(message="Error inesperado al intentar eliminar el usuario")
         
     
-    def update_user_external(self, user_id: int, user_data) -> dict:
+    def update_user(self, user_id: int, user_data) -> dict:
         try:
-            user = self.repository.update_user_external(user_id=user_id, data_user=user_data)
+            user = self.repository.update_user(user_id=user_id, data_user=user_data)
             
             if not user:
                 raise exceptions.UseCaseException(message="Error al actualizar usuario")
