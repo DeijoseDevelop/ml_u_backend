@@ -27,7 +27,8 @@ class UserExternalController:
                 "gender": data.get("gender"),
                 "user_type": data.get("user_type"),
                 "dependency": data.get("dependency"),
-                "academic_program": data.get("academic_program")
+                "academic_program": data.get("academic_program"),
+                "is_internal": False,
             }
 
 

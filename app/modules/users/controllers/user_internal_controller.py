@@ -25,9 +25,11 @@ class UserInternalController:
                 "document_number": data.get("document_number"),
                 "email": data.get("email"),
                 "password": password_hash,
-                "gender": data.get("gender"),
+                "gender": data.get("gender", None),
                 "user_type": data.get("user_type"),
-                "dependency": data.get("dependency"),
+                "dependency": data.get("dependency", None),
+                "academic_program": data.get("academic_program", None),
+                "is_internal": True,
             }
 
 

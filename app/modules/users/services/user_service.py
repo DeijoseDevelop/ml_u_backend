@@ -35,5 +35,5 @@ class UserService:
             "is_internal": user.is_internal,
             "dependency": user.dependency,
             "academic_program": user.academic_program,
-            "ingress_records": [record.to_dict() for record in user.ingress_records]
+            # "ingress_records": [record.to_dict() for record in user.ingress_records]
         }
