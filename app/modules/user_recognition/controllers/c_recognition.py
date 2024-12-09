@@ -21,16 +21,30 @@ class RecognitionController(interfaces.BaseController):
 
     def detect_face(
         self,
-        image_bytes: io.BytesIO
+        image_bytes: io.BytesIO,
+        data
     ) -> t.Dict[str, t.Any]:
         try:
-            detection = self.recognition_service.call(image_bytes=image_bytes)
+            
+            detections = self.recognition_service.call(image_bytes=image_bytes)
             io_image = self.image_manager.convert_cv2_image_to_bytes_io(self.image_manager.get_frame().get_value())
+            detection = detections[0] 
+            if detection["matched"]:
+                ingress_data = {
+                "user_id": detection["user_id"],
+                "suggestions_comments": None,
+                "protection_notice": True,
+                "reason": data.get("service"),
+                "site": data.get("site")
+                }
+                self.recognition_service.add_ingress_record(data=ingress_data)
+            else:
+                logging.error("No se pudo reconocer al usuario")
 
             if io_image is None:
                 raise Exception("Imagen no se pudo codificar.")
 
-            return {"data": detection, "image": io_image}
+            return {"data": detections, "image": io_image}
 
         except exceptions.UseCaseException as error:
             logging.error(f"UseCaseException in detect_face: {error}")

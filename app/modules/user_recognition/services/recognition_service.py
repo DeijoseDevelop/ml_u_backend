@@ -18,3 +18,9 @@ class RecognitionService(interfaces.Service):
             raise exceptions.UseCaseException(message="Coincidencias no detectadas")
 
         return detection
+    
+    def add_ingress_record(self, data):
+       ingress = self.repository.create_ingress_record(data=data)
+       if ingress is None:
+           raise exceptions.UseCaseException(message="Registro no creado")
+        

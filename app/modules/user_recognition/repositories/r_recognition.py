@@ -146,6 +146,7 @@ class RecognitionRepository:
 
                 # Preparar los datos para devolver
                 detection = {
+                    "user_id": user.id, 
                     "name": user.name,
                     "document_number": user.document_number,
                     "gender": user.gender,
@@ -161,14 +162,6 @@ class RecognitionRepository:
                     }
                 }
 
-                ingress_data = {
-                    "user_id": user.id,
-                    "suggestions_comments": None,
-                    "protection_notice": None,
-                    "services_library": None,
-                }
-                self.create_ingress_record(ingress_data)
-                # detection["ingress_record_id"] = ingress_record.id
 
             else:
                 detection = {
