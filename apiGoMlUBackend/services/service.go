@@ -4,7 +4,9 @@ import (
 	"fmt"
 
 	"github.com/Juan-Barraza/apiGoMl/repositories"
+	export "github.com/Juan-Barraza/apiGoMl/services/exportXlsx"
 	"github.com/Juan-Barraza/apiGoMl/utils"
+	"github.com/xuri/excelize/v2"
 )
 
 type DataService struct {
@@ -44,4 +46,22 @@ func (s *DataService) GetCombinedData() (*utils.CombinedResponse, error) {
 
 	return combinationResponse, nil
 
+}
+
+func (s *DataService) ExportDataIngressRecord() (*excelize.File, error) {
+	dataIngressRecord, err := s.Repo.GetDataForFileXlsx()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dataIngressRecord) == 0 {
+		return nil, nil
+	}
+
+	file, err := export.ExportXLSX(dataIngressRecord)
+	if err != nil {
+		return nil, fmt.Errorf("error al crear archivo")
+	}
+
+	return file, nil
 }

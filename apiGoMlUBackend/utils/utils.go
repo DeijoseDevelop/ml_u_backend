@@ -1,6 +1,9 @@
 package utils
 
-import "strconv"
+import (
+	"strconv"
+	"time"
+)
 
 type Filters struct {
 	CounterSitePrincipal bool
@@ -24,6 +27,16 @@ type TotalPerSite struct {
 type CombinedResponse struct {
 	Services []ChartData    `json:"services"`
 	Totals   []TotalPerSite `json:"totals"`
+}
+
+type IngressRecordData struct {
+	TimeStamp       *time.Time `json:"time_stamp"`
+	DocumentNumber  string     `json:"document_number"`
+	Gender          string     `json:"gender"`
+	UserType        string     `json:"user_type"`
+	Reason          string     `json:"reason"`
+	Dependency      string     `json:"dependency"`
+	AcademicProgram string     `json:"academic_program"`
 }
 
 func ParseBoolParams(param string) (bool, error) {

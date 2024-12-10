@@ -1,7 +1,9 @@
 package controllers
 
 import (
+	"bytes"
 	"log"
+	"time"
 
 	"github.com/Juan-Barraza/apiGoMl/services"
 	"github.com/Juan-Barraza/apiGoMl/utils"
@@ -98,4 +100,29 @@ func (dt *DataController) GetCombinedInformation(c fiber.Ctx) error {
 	}
 
 	return c.Status(200).JSON(results)
+}
+
+
+func (c *DataController) ExportXslx(ctx fiber.Ctx) error {
+
+	file, err := c.service.ExportDataIngressRecord()
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})
+	}
+	log.Println("File created successfully")
+
+	var buffer bytes.Buffer
+	if err := file.Write(&buffer); err != nil {
+		log.Println("Error writing file to buffer:", err)
+		return ctx.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	downloadName := "clientes_" + time.Now().UTC().Format("2006-01-02") + ".xlsx"
+	ctx.Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+	ctx.Set("Content-Disposition", "attachment; filename="+downloadName)
+
+	return ctx.SendStream(bytes.NewReader(buffer.Bytes()))
+
 }

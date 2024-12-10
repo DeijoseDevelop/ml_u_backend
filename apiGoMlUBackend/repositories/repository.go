@@ -175,3 +175,56 @@ func (r *DataRepositoty) GetTotalPerSite() ([]utils.TotalPerSite, error) {
 
 	return results, nil
 }
+
+func (r *DataRepositoty) GetDataForFileXlsx() ([]utils.IngressRecordData, error) {
+	query := `
+		SELECT 
+			ingress_records.time_stamp, 
+			ingress_records.reason,
+			users.document_number, 
+			users.user_type, 
+			users.dependency, 
+			users.academic_program, 
+			users.gender
+		FROM 
+			ingress_records
+		JOIN 
+			users ON users.id = ingress_records.user_id
+`
+
+	// Ejecuta la consulta
+	rows, err := r.DB.Query(query)
+	if err != nil {
+		return nil, fmt.Errorf("error al ejecutar la consulta: %v", err)
+	}
+	defer rows.Close()
+
+	if rows == nil {
+		return nil, fmt.Errorf("no se obtuvieron filas")
+	}
+
+	// Procesa los resultados
+	var records []utils.IngressRecordData
+	for rows.Next() {
+		var record utils.IngressRecordData
+		err := rows.Scan(
+			&record.TimeStamp,
+			&record.Reason,
+			&record.DocumentNumber,
+			&record.UserType,
+			&record.Dependency,
+			&record.AcademicProgram,
+			&record.Gender,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("error al escanear los datos: %v", err)
+		}
+		records = append(records, record)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error durante la iteración de filas: %v", err)
+	}
+
+	return records, nil
+}
