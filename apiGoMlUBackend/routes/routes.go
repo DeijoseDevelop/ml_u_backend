@@ -17,4 +17,6 @@ func SetUpRoutes(app *fiber.App, db *sql.DB) {
 	app.Use(middleware.JWTMiddleware())
 
 	app.Get("/api/v1/data", dataController.GetUsers)
+	app.Get("/api/v1/ingress_records", dataController.GetCombinedInformation)
+	app.Get("/api/v1/export_xlsx", dataController.ExportXslx)
 }

@@ -29,11 +29,13 @@ class UserRecognitionView(interfaces.APIView):
 
             if "picture" not in flask.request.files:
                 return utils.Response({"message": 'Picture not found'}, status=utils.Status.NOT_FOUND_404)
-
+            
+            data_record = flask.request.form
             picture = flask.request.files["picture"]
             io_picture = io.BytesIO(picture.stream.read())
-
-            recognition = controller.detect_face(io_picture)
+            if not data_record:
+                return utils.Response({"message": "Datos requeridos"}, status=400)
+            recognition = controller.detect_face(io_picture, data=data_record)
 
             if recognition is None:
                 return utils.Response({"message": 'Recognition failed'}, status=utils.Status.BAD_REQUEST_400)
