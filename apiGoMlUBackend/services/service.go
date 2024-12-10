@@ -17,9 +17,6 @@ func NewDataService(repo *repositories.DataRepositoty) *DataService {
 	return &DataService{Repo: repo}
 }
 
-func (s *DataService) GetUsers() ([]map[string]interface{}, error) {
-	return s.Repo.GetUser()
-}
 
 func (s *DataService) GetInformation(filters utils.Filters) (int, error) {
 	result, err := s.Repo.GetInformationRecord(filters)
