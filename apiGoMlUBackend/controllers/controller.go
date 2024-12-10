@@ -18,14 +18,6 @@ func NewDataController(service *services.DataService) *DataController {
 	return &DataController{service: service}
 }
 
-func (dt *DataController) GetUsers(c fiber.Ctx) error {
-	users, err := dt.service.GetUsers()
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch users"})
-	}
-	return c.Status(fiber.StatusOK).JSON(users)
-}
-
 func (dt *DataController) GetInformsRecord(c fiber.Ctx) error {
 	counterSitePrincipalstr := c.Query("sitePrincipal")
 	counterSiteDowntownstr := c.Query("siteDowntown")
@@ -101,7 +93,6 @@ func (dt *DataController) GetCombinedInformation(c fiber.Ctx) error {
 
 	return c.Status(200).JSON(results)
 }
-
 
 func (c *DataController) ExportXslx(ctx fiber.Ctx) error {
 
