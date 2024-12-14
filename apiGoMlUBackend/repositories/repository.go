@@ -3,74 +3,180 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/Juan-Barraza/apiGoMl/utils"
 )
 
-type DataRepositoty struct {
+type DataRepository struct {
 	DB *sql.DB
 }
 
-func NewDataRepository(db *sql.DB) *DataRepositoty {
-	return &DataRepositoty{DB: db}
+func NewDataRepository(db *sql.DB) *DataRepository {
+	return &DataRepository{DB: db}
+}
+
+func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils.CombinedResponse, error) {
+    whereClause, params := r.buildWhereClause(filters)
+
+    // Consulta principal para los datos del gráfico
+    query := fmt.Sprintf(`
+        SELECT 
+            ir.reason AS service, 
+            LOWER(ir.site) AS site, 
+            LOWER(u.dependency) AS dependency, 
+            COUNT(*) AS total
+        FROM 
+            ingress_records ir
+        JOIN
+            users u ON ir.user_id = u.id
+        %s
+        GROUP BY ir.reason, ir.site, u.dependency
+        ORDER BY ir.reason, ir.site, u.dependency;
+    `, whereClause)
+
+    rows, err := r.DB.Query(query, params...)
+    if err != nil {
+        return nil, fmt.Errorf("error al ejecutar la consulta principal: %w", err)
+    }
+    defer rows.Close()
+
+    chartData, err := r.formatChartData(rows)
+    if err != nil {
+        return nil, fmt.Errorf("error al formatear datos del gráfico: %w", err)
+    }
+
+    // Consulta para los totales por sede
+    totalsQuery := fmt.Sprintf(`
+        SELECT 
+            LOWER(site) AS site, 
+            COUNT(*) AS total
+        FROM 
+            ingress_records ir
+        JOIN
+            users u ON ir.user_id = u.id
+        %s
+        GROUP BY site
+        ORDER BY site;
+    `, whereClause)
+
+    totalRows, err := r.DB.Query(totalsQuery, params...)
+    if err != nil {
+        return nil, fmt.Errorf("error al ejecutar la consulta de totales: %w", err)
+    }
+    defer totalRows.Close()
+
+    var totals []utils.TotalPerSite
+    for totalRows.Next() {
+        var site string
+        var total int
+
+        if err := totalRows.Scan(&site, &total); err != nil {
+            return nil, fmt.Errorf("error al escanear totales: %w", err)
+        }
+
+        totals = append(totals, utils.TotalPerSite{
+            Site:  site,
+            Total: total,
+        })
+    }
+
+    return &utils.CombinedResponse{
+        Services: chartData,
+        Totals:   totals,
+    }, nil
+}
+
+func (r *DataRepository) buildWhereClause(filters utils.Filters) (string, []interface{}) {
+    var whereClauses []string
+    var params []interface{}
+
+    if filters.Site != "" {
+        whereClauses = append(whereClauses, "LOWER(ir.site) = ?")
+        params = append(params, strings.ToLower(filters.Site))
+    }
+
+    if filters.StartDate != nil {
+        whereClauses = append(whereClauses, "ir.time_stamp >= ?")
+        params = append(params, filters.StartDate)
+    }
+
+    if filters.EndDate != nil {
+        whereClauses = append(whereClauses, "ir.time_stamp <= ?")
+        params = append(params, filters.EndDate)
+    }
+
+    if filters.AcademicProgram != "" {
+        whereClauses = append(whereClauses, "u.academic_program = ?")
+        params = append(params, filters.AcademicProgram)
+    }
+
+    if filters.DocumentNumber != "" {
+        whereClauses = append(whereClauses, "u.document_number = ?")
+        params = append(params, filters.DocumentNumber)
+    }
+
+    if filters.Dependency != "" {
+        whereClauses = append(whereClauses, "LOWER(u.dependency) = ?")
+        params = append(params, strings.ToLower(filters.Dependency))
+    }
+
+    whereClause := ""
+    if len(whereClauses) > 0 {
+        whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
+    }
+
+    return whereClause, params
+}
+
+func (r *DataRepository) formatChartData(rows *sql.Rows) ([]utils.ChartData, error) {
+    groupedData := map[string]map[string]map[string]int{}
+
+    for rows.Next() {
+        var service, site, dependency string
+        var total int
+
+        if err := rows.Scan(&service, &site, &dependency, &total); err != nil {
+            return nil, fmt.Errorf("error al escanear filas: %w", err)
+        }
+
+        if _, exists := groupedData[service]; !exists {
+            groupedData[service] = map[string]map[string]int{}
+        }
+        if _, exists := groupedData[service][site]; !exists {
+            groupedData[service][site] = map[string]int{}
+        }
+
+        // Si 'dependency' está vacío, se agrupan bajo "all"
+        if dependency != "" {
+            groupedData[service][site][dependency] = total
+        } else {
+            if _, exists := groupedData[service][site]["all"]; !exists {
+                groupedData[service][site]["all"] = 0
+            }
+            groupedData[service][site]["all"] += total
+        }
+    }
+
+    var chartData []utils.ChartData
+    for service, siteData := range groupedData {
+        siteDependencyData := map[string]int{}
+        for site, dependencies := range siteData {
+            for dependency, count := range dependencies {
+                siteDependencyData[fmt.Sprintf("%s (%s)", site, dependency)] = count
+            }
+        }
+        chartData = append(chartData, utils.ChartData{
+            Service: service,
+            Data:    siteDependencyData,
+        })
+    }
+
+    return chartData, nil
 }
 
 
-func (r *DataRepositoty) GetInformationRecord(filters utils.Filters) (int, error) {
-	var results int
-	query := "SELECT COUNT(*) FROM ingress_records WHERE 1=1"
-	var conditions []string
-
-	if filters.CounterSitePrincipal {
-		conditions = append(conditions, "site = 'Sede cuatro vientos'")
-	}
-
-	if filters.CounterSiteDowntown {
-		conditions = append(conditions, "site = 'Sede centro'")
-	}
-
-	if filters.LoanBook {
-		conditions = append(conditions, "reason = 'Prestamo de libros'")
-	}
-
-	if filters.LoanComputer {
-		conditions = append(conditions, "reason = 'Prestamo de computadoras'")
-	}
-
-	if filters.ConsultRoom {
-		conditions = append(conditions, "reason = 'Consulta en sala'")
-	}
-
-	if filters.CounterTotal {
-		query = "SELECT COUNT(*) FROM ingress_records"
-	} else if len(conditions) > 0 {
-		// Si hay condiciones, agregarlas a la consulta
-		query += " AND " + strings.Join(conditions, " AND ")
-	}
-
-	// Ejecutar la consulta
-	rows, err := r.DB.Query(query)
-	if err != nil {
-		log.Fatal("Error ejecutando la consulta:", err)
-		return 0, err
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		err := rows.Scan(&results)
-		if err != nil {
-			return 0, fmt.Errorf("error escaneando el resultado: %v", err)
-		}
-	} else {
-		return 0, fmt.Errorf("no se encontraron resultados")
-	}
-
-	return results, nil
-}
-
-func (r *DataRepositoty) GetChartData() ([]utils.ChartData, error) {
+func (r *DataRepository) GetChartData() ([]utils.ChartData, error) {
 	query := `
 		SELECT 
 			reason AS service,
@@ -117,7 +223,7 @@ func (r *DataRepositoty) GetChartData() ([]utils.ChartData, error) {
 	return chartData, nil
 }
 
-func (r *DataRepositoty) GetTotalPerSite() ([]utils.TotalPerSite, error) {
+func (r *DataRepository) GetTotalPerSite() ([]utils.TotalPerSite, error) {
 	query := `
 		SELECT 
     		site,
@@ -152,7 +258,7 @@ func (r *DataRepositoty) GetTotalPerSite() ([]utils.TotalPerSite, error) {
 	return results, nil
 }
 
-func (r *DataRepositoty) GetDataForFileXlsx() ([]utils.IngressRecordData, error) {
+func (r *DataRepository) GetDataForFileXlsx() ([]utils.IngressRecordData, error) {
 	query := `
 		SELECT 
 			ingress_records.time_stamp, 
