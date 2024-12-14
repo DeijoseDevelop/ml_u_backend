@@ -17,10 +17,10 @@ func NewDataRepository(db *sql.DB) *DataRepository {
 }
 
 func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils.CombinedResponse, error) {
-    whereClause, params := r.buildWhereClause(filters)
+	whereClause, params := r.buildWhereClause(filters)
 
-    // Consulta principal para los datos del gráfico
-    query := fmt.Sprintf(`
+	// Consulta principal para los datos del gráfico
+	query := fmt.Sprintf(`
         SELECT 
             ir.reason AS service, 
             LOWER(ir.site) AS site, 
@@ -35,21 +35,21 @@ func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils
         ORDER BY ir.reason, ir.site, u.dependency;
     `, whereClause)
 
-    rows, err := r.DB.Query(query, params...)
-    if err != nil {
-        return nil, fmt.Errorf("error al ejecutar la consulta principal: %w", err)
-    }
-    defer rows.Close()
+	rows, err := r.DB.Query(query, params...)
+	if err != nil {
+		return nil, fmt.Errorf("error al ejecutar la consulta principal: %w", err)
+	}
+	defer rows.Close()
 
-    chartData, err := r.formatChartData(rows)
-    if err != nil {
-        return nil, fmt.Errorf("error al formatear datos del gráfico: %w", err)
-    }
+	chartData, err := r.formatChartData(rows)
+	if err != nil {
+		return nil, fmt.Errorf("error al formatear datos del gráfico: %w", err)
+	}
 
-    // Consulta para los totales por sede
-    totalsQuery := fmt.Sprintf(`
+	// Consulta para los totales por sede
+	totalsQuery := fmt.Sprintf(`
         SELECT 
-            LOWER(site) AS site, 
+            site, 
             COUNT(*) AS total
         FROM 
             ingress_records ir
@@ -60,121 +60,136 @@ func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils
         ORDER BY site;
     `, whereClause)
 
-    totalRows, err := r.DB.Query(totalsQuery, params...)
-    if err != nil {
-        return nil, fmt.Errorf("error al ejecutar la consulta de totales: %w", err)
-    }
-    defer totalRows.Close()
+	totalRows, err := r.DB.Query(totalsQuery, params...)
+	if err != nil {
+		return nil, fmt.Errorf("error al ejecutar la consulta de totales: %w", err)
+	}
+	defer totalRows.Close()
 
-    var totals []utils.TotalPerSite
-    for totalRows.Next() {
-        var site string
-        var total int
+	combinedTotals := make(map[string]int)
 
-        if err := totalRows.Scan(&site, &total); err != nil {
-            return nil, fmt.Errorf("error al escanear totales: %w", err)
-        }
+	var totals []utils.TotalPerSite
+	for totalRows.Next() {
+		var site string
+		var total int
 
-        totals = append(totals, utils.TotalPerSite{
-            Site:  site,
-            Total: total,
-        })
-    }
+		if err := totalRows.Scan(&site, &total); err != nil {
+			return nil, fmt.Errorf("error al escanear totales: %w", err)
+		}
 
-    return &utils.CombinedResponse{
-        Services: chartData,
-        Totals:   totals,
-    }, nil
+		site = strings.ToLower(site)
+		if existingTotal, exist := combinedTotals[site]; exist {
+			combinedTotals[site] = existingTotal + total
+		} else {
+			combinedTotals[site] = total
+		}
+	}
+
+	for site, total := range combinedTotals {
+		totals = append(totals, utils.TotalPerSite{
+			Site:  site,
+			Total: total,
+		})
+	}
+
+	return &utils.CombinedResponse{
+		Services: chartData,
+		Totals:   totals,
+	}, nil
 }
 
 func (r *DataRepository) buildWhereClause(filters utils.Filters) (string, []interface{}) {
-    var whereClauses []string
-    var params []interface{}
+	var whereClauses []string
+	var params []interface{}
 
-    if filters.Site != "" {
-        whereClauses = append(whereClauses, "LOWER(ir.site) = ?")
-        params = append(params, strings.ToLower(filters.Site))
-    }
+	if filters.Site != "" {
+		whereClauses = append(whereClauses, "LOWER(ir.site) = ?")
+		params = append(params, strings.ToLower(filters.Site))
+	}
 
-    if filters.StartDate != nil {
-        whereClauses = append(whereClauses, "ir.time_stamp >= ?")
-        params = append(params, filters.StartDate)
-    }
+	if filters.StartDate != nil {
+		whereClauses = append(whereClauses, "ir.time_stamp >= ?")
+		params = append(params, filters.StartDate)
+	}
 
-    if filters.EndDate != nil {
-        whereClauses = append(whereClauses, "ir.time_stamp <= ?")
-        params = append(params, filters.EndDate)
-    }
+	if filters.EndDate != nil {
+		whereClauses = append(whereClauses, "ir.time_stamp <= ?")
+		params = append(params, filters.EndDate)
+	}
 
-    if filters.AcademicProgram != "" {
-        whereClauses = append(whereClauses, "u.academic_program = ?")
-        params = append(params, filters.AcademicProgram)
-    }
+	if filters.AcademicProgram != "" {
+		whereClauses = append(whereClauses, "u.academic_program = ?")
+		params = append(params, filters.AcademicProgram)
+	}
 
-    if filters.DocumentNumber != "" {
-        whereClauses = append(whereClauses, "u.document_number = ?")
-        params = append(params, filters.DocumentNumber)
-    }
+	if filters.DocumentNumber != "" {
+		whereClauses = append(whereClauses, "u.document_number = ?")
+		params = append(params, filters.DocumentNumber)
+	}
 
-    if filters.Dependency != "" {
-        whereClauses = append(whereClauses, "LOWER(u.dependency) = ?")
-        params = append(params, strings.ToLower(filters.Dependency))
-    }
+	if filters.Dependency != "" {
+		whereClauses = append(whereClauses, "LOWER(u.dependency) = ?")
+		params = append(params, strings.ToLower(filters.Dependency))
+	}
 
-    whereClause := ""
-    if len(whereClauses) > 0 {
-        whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
-    }
+	if filters.Reason != "" {
+		whereClauses = append(whereClauses, "LOWER(ir.reason) = ?")
+		params = append(params, strings.ToLower(filters.Reason))
+	}
 
-    return whereClause, params
+	whereClause := ""
+	if len(whereClauses) > 0 {
+		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
+	}
+
+	return whereClause, params
 }
 
 func (r *DataRepository) formatChartData(rows *sql.Rows) ([]utils.ChartData, error) {
-    groupedData := map[string]map[string]map[string]int{}
+	groupedData := map[string]map[string]map[string]int{}
 
-    for rows.Next() {
-        var service, site, dependency string
-        var total int
+	for rows.Next() {
+		var service, site, dependency string
+		var total int
 
-        if err := rows.Scan(&service, &site, &dependency, &total); err != nil {
-            return nil, fmt.Errorf("error al escanear filas: %w", err)
-        }
+		if err := rows.Scan(&service, &site, &dependency, &total); err != nil {
+			return nil, fmt.Errorf("error al escanear filas: %w", err)
+		}
 
-        if _, exists := groupedData[service]; !exists {
-            groupedData[service] = map[string]map[string]int{}
-        }
-        if _, exists := groupedData[service][site]; !exists {
-            groupedData[service][site] = map[string]int{}
-        }
+		if _, exists := groupedData[service]; !exists {
+			groupedData[service] = map[string]map[string]int{}
+		}
+		if _, exists := groupedData[service][site]; !exists {
+			groupedData[service][site] = map[string]int{}
+		}
 
-        // Si 'dependency' está vacío, se agrupan bajo "all"
-        if dependency != "" {
-            groupedData[service][site][dependency] = total
-        } else {
-            if _, exists := groupedData[service][site]["all"]; !exists {
-                groupedData[service][site]["all"] = 0
-            }
-            groupedData[service][site]["all"] += total
-        }
-    }
+		// Si 'dependency' está vacío, se agrupan bajo "all"
+		if dependency != "" {
+			groupedData[service][site][dependency] = total
+		} else {
+			if _, exists := groupedData[service][site]["all"]; !exists {
+				groupedData[service][site]["all"] = 0
+			}
+			groupedData[service][site]["all"] += total
+		}
+	}
 
-    var chartData []utils.ChartData
-    for service, siteData := range groupedData {
-        siteDependencyData := map[string]int{}
-        for site, dependencies := range siteData {
-            for dependency, count := range dependencies {
-                siteDependencyData[fmt.Sprintf("%s (%s)", site, dependency)] = count
-            }
-        }
-        chartData = append(chartData, utils.ChartData{
-            Service: service,
-            Data:    siteDependencyData,
-        })
-    }
+	var chartData []utils.ChartData
+	for service, siteData := range groupedData {
+		siteDependencyData := map[string]int{}
+		for site, dependencies := range siteData {
+			for dependency, count := range dependencies {
+				siteDependencyData[fmt.Sprintf("%s (%s)", site, dependency)] = count
+			}
+		}
+		chartData = append(chartData, utils.ChartData{
+			Service: service,
+			Data:    siteDependencyData,
+		})
+	}
 
-    return chartData, nil
+	return chartData, nil
 }
-
 
 func (r *DataRepository) GetChartData() ([]utils.ChartData, error) {
 	query := `
