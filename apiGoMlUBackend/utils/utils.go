@@ -6,12 +6,13 @@ import (
 )
 
 type Filters struct {
-	CounterSitePrincipal bool
-	CounterSiteDowntown  bool
-	CounterTotal         bool
-	LoanBook             bool
-	LoanComputer         bool
-	ConsultRoom          bool
+	Site            string     `json:"site"`
+	StartDate       *time.Time `json:"start_date"`
+	EndDate         *time.Time `json:"end_date"`
+	AcademicProgram string     `json:"academic_program"`
+	DocumentNumber  string     `json:"document_number"`
+	Dependency      string     `json:"dependency"`
+	Reason          string     `json:"reason"`
 }
 
 type ChartData struct {

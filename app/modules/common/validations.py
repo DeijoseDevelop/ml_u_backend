@@ -17,8 +17,6 @@ def validate_user_data_with_picture(user_data, picture):
         raise exceptions.UseCaseException(message="Tipo de usuario es requerido")
     if not user_data.get("dependency"):
         raise exceptions.UseCaseException(message="Dependencia es requerido")
-    if not user_data.get("academic_program"):
-        raise exceptions.UseCaseException(message="Programa academico es requerido")
     if not picture:
         raise exceptions.UseCaseException(message="Imagen es requerida")
     validate_email(user_data.get("email"))

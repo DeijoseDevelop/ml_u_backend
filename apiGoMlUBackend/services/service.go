@@ -10,18 +10,17 @@ import (
 )
 
 type DataService struct {
-	Repo *repositories.DataRepositoty
+	Repo *repositories.DataRepository
 }
 
-func NewDataService(repo *repositories.DataRepositoty) *DataService {
+func NewDataService(repo *repositories.DataRepository) *DataService {
 	return &DataService{Repo: repo}
 }
 
-
-func (s *DataService) GetInformation(filters utils.Filters) (int, error) {
-	result, err := s.Repo.GetInformationRecord(filters)
+func (s *DataService) GetInformation(filters utils.Filters) (*utils.CombinedResponse, error) {
+	result, err := s.Repo.GetFilteredDashboardData(filters)
 	if err != nil {
-		return 0, err
+		return nil, fmt.Errorf("error en el servicio al obtener información: %w", err)
 	}
 	return result, nil
 }
@@ -34,6 +33,13 @@ func (s *DataService) GetCombinedData() (*utils.CombinedResponse, error) {
 	totalsData, err := s.Repo.GetTotalPerSite()
 	if err != nil {
 		return nil, fmt.Errorf("error al obtener total de datos")
+	}
+
+	if servicesData == nil {
+		servicesData = []utils.ChartData{}
+	}
+	if totalsData == nil {
+		totalsData = []utils.TotalPerSite{}
 	}
 
 	combinationResponse := &utils.CombinedResponse{
