@@ -35,6 +35,13 @@ func (s *DataService) GetCombinedData() (*utils.CombinedResponse, error) {
 		return nil, fmt.Errorf("error al obtener total de datos")
 	}
 
+	if servicesData == nil {
+		servicesData = []utils.ChartData{}
+	}
+	if totalsData == nil {
+		totalsData = []utils.TotalPerSite{}
+	}
+
 	combinationResponse := &utils.CombinedResponse{
 		Services: servicesData,
 		Totals:   totalsData,

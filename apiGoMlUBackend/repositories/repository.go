@@ -3,6 +3,7 @@ package repositories
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/Juan-Barraza/apiGoMl/utils"
@@ -31,9 +32,12 @@ func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils
         JOIN
             users u ON ir.user_id = u.id
         %s
-        GROUP BY ir.reason, ir.site, u.dependency
-        ORDER BY ir.reason, ir.site, u.dependency;
+        GROUP BY ir.reason, LOWER(ir.site), LOWER(u.dependency)
+        ORDER BY ir.reason, LOWER(ir.site), LOWER(u.dependency);
     `, whereClause)
+
+	log.Printf("Consulta principal: %s", query)
+	log.Printf("Parámetros: %v", params)
 
 	rows, err := r.DB.Query(query, params...)
 	if err != nil {
@@ -49,16 +53,18 @@ func (r *DataRepository) GetFilteredDashboardData(filters utils.Filters) (*utils
 	// Consulta para los totales por sede
 	totalsQuery := fmt.Sprintf(`
         SELECT 
-            site, 
+            LOWER(ir.site) AS site, 
             COUNT(*) AS total
         FROM 
             ingress_records ir
         JOIN
             users u ON ir.user_id = u.id
         %s
-        GROUP BY site
-        ORDER BY site;
+        GROUP BY LOWER(ir.site)
+        ORDER BY LOWER(ir.site);
     `, whereClause)
+
+	log.Printf("Consulta de totales: %s", totalsQuery)
 
 	totalRows, err := r.DB.Query(totalsQuery, params...)
 	if err != nil {
@@ -103,43 +109,45 @@ func (r *DataRepository) buildWhereClause(filters utils.Filters) (string, []inte
 	var params []interface{}
 
 	if filters.Site != "" {
-		whereClauses = append(whereClauses, "LOWER(ir.site) = ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(ir.site) = $%d", len(params)+1))
 		params = append(params, strings.ToLower(filters.Site))
 	}
 
 	if filters.StartDate != nil {
-		whereClauses = append(whereClauses, "ir.time_stamp >= ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("ir.time_stamp >= $%d", len(params)+1))
 		params = append(params, filters.StartDate)
 	}
 
 	if filters.EndDate != nil {
-		whereClauses = append(whereClauses, "ir.time_stamp <= ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("ir.time_stamp <= $%d", len(params)+1))
 		params = append(params, filters.EndDate)
 	}
 
 	if filters.AcademicProgram != "" {
-		whereClauses = append(whereClauses, "u.academic_program = ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("u.academic_program = $%d", len(params)+1))
 		params = append(params, filters.AcademicProgram)
 	}
 
 	if filters.DocumentNumber != "" {
-		whereClauses = append(whereClauses, "u.document_number = ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("u.document_number = $%d", len(params)+1))
 		params = append(params, filters.DocumentNumber)
 	}
 
 	if filters.Dependency != "" {
-		whereClauses = append(whereClauses, "LOWER(u.dependency) = ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(u.dependency) = $%d", len(params)+1))
 		params = append(params, strings.ToLower(filters.Dependency))
 	}
 
 	if filters.Reason != "" {
-		whereClauses = append(whereClauses, "LOWER(ir.reason) = ?")
+		whereClauses = append(whereClauses, fmt.Sprintf("LOWER(ir.reason) = $%d", len(params)+1))
 		params = append(params, strings.ToLower(filters.Reason))
 	}
 
 	whereClause := ""
 	if len(whereClauses) > 0 {
 		whereClause = "WHERE " + strings.Join(whereClauses, " AND ")
+	} else {
+		whereClause = "WHERE TRUE" 
 	}
 
 	return whereClause, params

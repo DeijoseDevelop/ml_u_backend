@@ -1,0 +1,25 @@
+# Ignorar binarios o archivos compilados
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+
+# Ignorar bases de datos o logs temporales
+*.db
+*.log
+
+# Ignorar directorios innecesarios para el contenedor Python
+apiGoMlUBackend/   
+node_modules/
+dist/
+build/
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+
+# Ignorar archivos de control de versiones
+.git
+.gitignore
+.vscode/
+.idea/
+

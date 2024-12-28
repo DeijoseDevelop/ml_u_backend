@@ -6,7 +6,7 @@ class AcademicProgram(enum.Enum):
     TOURIST_AND_HOTEL_ADMINISTRATION = "Administración Turísticas y Hoteleras"
     PUBLIC_ACCOUNTING = "Contaduría Pública"
     LAW = "Derecho"
-    SPECIALIZATION = "especializacion"
+    SPECIALIZATION = "Especializacion"
     EXTERNAL = "Externo"
     SYSTEM_ENGINEERING = "Ingeniería de Sistemas"
     INDUSTRIAL_ENGINEERING = "Ingeniería Industrial"

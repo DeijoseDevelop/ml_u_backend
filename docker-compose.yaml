@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ml_u_backend_backend  
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    env_file:
+      - .env
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin/data
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - ml_u_backend_backend  
+
+  go-app:
+    build:
+      context: ./apiGoMlUBackend
+      dockerfile: Dockerfile
+    container_name: go_app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - ml_u_backend_backend  
+
+  python-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: python_app
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    # env_file:
+    #   - .env
+    networks:
+      - ml_u_backend_backend  
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  ml_u_backend_backend:
+    driver: bridge
+
