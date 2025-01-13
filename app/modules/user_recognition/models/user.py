@@ -9,7 +9,7 @@ class User(db.Model):
     last_name = db.Column(db.String(50), nullable=False)
     document_number = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(50), unique=True, nullable=False)
-    password = db.Column(db.String(20), nullable=True)
+    password = db.Column(db.String(225), nullable=True)
     gender = db.Column(db.String(20), nullable=False)
     user_type = db.Column(db.String(20), nullable=False)
     is_internal = db.Column(db.Boolean, default=False)

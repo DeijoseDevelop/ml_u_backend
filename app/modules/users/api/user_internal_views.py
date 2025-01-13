@@ -13,6 +13,7 @@ class UserInternalCreateView(interfaces.APIView):
         try:
             # Obtener datos de la solicitud
             user_data = flask.request.form if flask.request.form else flask.request.json
+            logging.debug(f"Received user data: {user_data}")
 
             validations.validate_user_data(user_data=user_data)
             user_service = services.UserInternalService()

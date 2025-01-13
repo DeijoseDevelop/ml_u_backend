@@ -19,63 +19,50 @@ func NewDataController(service *services.DataService) *DataController {
 }
 
 func (dt *DataController) GetInformsRecord(c fiber.Ctx) error {
-	counterSitePrincipalstr := c.Query("sitePrincipal")
-	counterSiteDowntownstr := c.Query("siteDowntown")
-	counterTotalstr := c.Query("countTotal")
-	loanBookstr := c.Query("loanBook")
-	loanComputerstr := c.Query("loanComputer")
-	consultRoomstr := c.Query("consultRoom")
+	site := c.Query("site")
+	startDatestr := c.Query("startDatestr")
+	endDatesrt := c.Query("endDatesrt")
+	academicProgram := c.Query("academicProgram")
+	documentNumber := c.Query("documentNumber")
+	dependency := c.Query("dependency")
+	reason := c.Query("reason")
+	var startDate, endDate *time.Time
+	var err error
 
-	counterSiteDowntown, err := utils.ParseBoolParams(counterSiteDowntownstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
+	if startDatestr != "" {
+		parsedStartDate, err := time.Parse("2006-01-02", startDatestr)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"error": "error al parsear fecha de inicio",
+			})
+		}
+		startDate = &parsedStartDate
 	}
-	counterSitePrincipal, err := utils.ParseBoolParams(counterSitePrincipalstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
-	}
-	counterTotal, err := utils.ParseBoolParams(counterTotalstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
-	}
-	loanBook, err := utils.ParseBoolParams(loanBookstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
-	}
-	loanComputer, err := utils.ParseBoolParams(loanComputerstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
-	}
-	consultRoom, err := utils.ParseBoolParams(consultRoomstr)
-	if err != nil {
-		return c.Status(400).JSON(fiber.Map{
-			"error": "error al parsear de string a bool",
-		})
+
+	if endDatesrt != "" {
+		parsedEndDate, err := time.Parse("2006-01-02", endDatesrt)
+		if err != nil {
+			return c.Status(400).JSON(fiber.Map{
+				"error": "error al parsear fecha de fin",
+			})
+		}
+		endDate = &parsedEndDate
 	}
 
 	filters := utils.Filters{
-		CounterSitePrincipal: counterSitePrincipal,
-		CounterSiteDowntown:  counterSiteDowntown,
-		CounterTotal:         counterTotal,
-		LoanComputer:         loanComputer,
-		LoanBook:             loanBook,
-		ConsultRoom:          consultRoom,
+		Site:            site,
+		StartDate:       startDate,
+		EndDate:         endDate,
+		AcademicProgram: academicProgram,
+		DocumentNumber:  documentNumber,
+		Dependency:      dependency,
+		Reason:          reason,
 	}
 
 	results, err := dt.service.GetInformation(filters)
 	if err != nil {
 		return c.Status(500).JSON(fiber.Map{
-			"error": "Error al obtener datos",
+			"error": err.Error(),
 		})
 	}
 

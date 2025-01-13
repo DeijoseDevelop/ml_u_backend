@@ -1,4 +1,4 @@
-from app.config import *
+from app.config import app, db
 from app.modules.category_classificator import api as classificator_apps
 from app.modules.user_recognition import api as recognition_apps
 from app.modules.users import api as users_app
@@ -11,9 +11,16 @@ app.register_blueprint(recognition_apps.user_recognition_app)
 app.register_blueprint(users_app.users)
 app.register_blueprint(auth_user.auth_user_internal)
 
-with app.app_context():
-    db.create_all()
+# with app.app_context():
+#     db.create_all()
 
+try:
+    with app.app_context():
+        db.create_all()
+    print("Tables created successfully")
+except Exception as e:
+    print(f"Error creating tables: {e}")
+    
 # Run Application
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True, port=5000)

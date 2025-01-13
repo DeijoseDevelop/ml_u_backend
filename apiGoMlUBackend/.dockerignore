@@ -1,0 +1,31 @@
+# Ignorar binarios o archivos compilados
+go-execute
+*.exe
+*.o
+*.so
+
+# Ignorar dependencias externas descargadas
+pkg/mod
+vendor/
+
+# Ignorar archivos del sistema operativo
+.DS_Store
+
+# Ignorar archivos de control de versiones
+.git
+.gitignore
+.vscode/
+.idea/
+
+# Ignorar logs y archivos temporales
+*.log
+*.tmp
+
+# Ignorar directorios específicos para otras APIs o frameworks
+ml_u_backend/
+app/   
+node_modules/
+dist/
+build/
+
+
